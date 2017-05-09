@@ -7,26 +7,31 @@ filename = 'D:\repos\Github\PELFOSS\surveync\transect_endpoints_IESNS2017.txt';
 pos = surveycn_transectendpoints(filename);
 
 %% Set survey speed 
-s  = 10*1800/3600;% m/s
+s  = 10;%nmi per h*1800/3600;% m/s
 t0 = datenum(2017,05,01);
 t = .1; % trawl stations per nmi
 %% Set start position!
+start(1).time = t0;
 start(1).lat = 60.398206; 
 start(1).lon = 5.314336;
 start(1).vessel = 'NO';
 
+start(2).time = t0;
 start(2).lat = 69;  
 start(2).lon = 30.06;
 start(2).vessel = 'RU';
 
+start(3).time = t0;
 start(3).lat = 60.398206; 
 start(3).lon = 5.314336;
 start(3).vessel = 'IS';
 
+start(4).time = t0;
 start(4).lat = 60.398206; 
 start(4).lon = 5.314336;
 start(4).vessel = 'EU';
 
+start(5).time = t0;
 start(5).lat = 60.398206; 
 start(5).lon = 5.314336;
 start(5).vessel = 'FO';
@@ -44,10 +49,10 @@ for i=1:length(pos)
     pos(i).R = [0; cumsum(r)/1.852];
     pos(i).lat = interp1(pos(i).R,lats ,1:ceil(max(pos(i).R)),'linear','extrap');
     pos(i).lon = interp1(pos(i).R,longs,1:ceil(max(pos(i).R)),'linear','extrap');
-    pos(i).dist = interp1(pos(i).R,pos(i).R,1:ceil(max(pos(i).R)),'linear','extrap');
+    pos(i).dist = 1:ceil(max(pos(i).R));
 end
 
-%% Sort the transects by vessel
+%% Sort and order the transects by vessel
 pos2=struct;
 for i=1:length(vessels)
     k=1;
@@ -64,17 +69,15 @@ for i=1:length(vessels)
     pos2(i).transectorder = survey_transectorder(pz);
 end
 
-%% Calculate transects
-for p=1:lengt(pos2)
-    pos2(p).LAT=[];
-    pos2(p).LON=[];
-    pos2(p).D=[];
-    for i=1:length(pos2)
-        LAT = [LAT pos(i).lat];
-        LON = [LON pos(i).lon];
-        D = pos(i).dist;
-    end
-    TIME = repmat(t0,[1 size(LAT,2)]);
+%% Calculate time (between transects)
+LAT =[];
+LON =[];
+TIME=[];
+for p=1:length(pos2)
+    Dum=survey_transeectdistance(pos2(p),s);
+    LAT=[LAT Dum.LAT];
+    LON=[LON Dum.LON];
+    TIME=[TIME Dum.TIME];
 end
 
 %% Plot the results
