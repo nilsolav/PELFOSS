@@ -166,4 +166,36 @@ ncid = netcdf.open('survey_lines.nc');
 LATnils  = netcdf.getVar(ncid,0);
 LONnils  = netcdf.getVar(ncid,1);
 TIMEnils = netcdf.getVar(ncid,2);
+netcdf.close(ncid);
+
+%% Read the model output files
+ncdisp('modeloutput.nc')
+
+ncid2 = netcdf.open('modeloutput.nc');
+
+test=netcdf.getVar(ncid2,0);
+
+figure
+m_proj('lambert','long',[-20 45],'lat',[60 80])
+m_coast('patch',[1 .85 .7]);
+m_elev('contourf',[500:500:6000]);
+m_grid('box','fancy','tickdir','in');
+colormap(flipud(copper));
+hold on
+
+dim=4;
+test(isnan(test(:,dim)),:)=0;
+
+cm = zeros(64,3);
+cm(1:end,1)= (64:-1:1)/64;
+cm(1,:)=[0.7 0.7 0.7];
+
+c = round((size(cm,1)-1)*test(:,dim)./max(test(:,dim)))+1;
+ms = (12*test(:,dim)./max(test(:,dim)))+1;
+% c = interp1(1:10,1:64,test(:,3))
+%m_plot(test(i,3),test(i,2),'.','color','k','MarkerSize',.5)
+for i=1:length(test(:,3))
+    m_plot(test(i,3),test(i,2),'.','color',cm(c(i),:),'MarkerSize',ms(i))
+end
+
 
